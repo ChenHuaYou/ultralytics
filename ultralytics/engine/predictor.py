@@ -305,7 +305,7 @@ class BasePredictor:
             LOGGER.info(f"Results saved to {colorstr('bold', self.save_dir)}{s}")
         self.run_callbacks("on_predict_end")
 
-    def setup_model(self, model, verbose=True):
+    def setup_model(self, model, verbose=True, **kwargs):
         """Initialize YOLO model with given parameters and set it to evaluation mode."""
         self.model = AutoBackend(
             weights=model or self.args.model,
@@ -316,6 +316,7 @@ class BasePredictor:
             batch=self.args.batch,
             fuse=True,
             verbose=verbose,
+            **kwargs,
         )
 
         self.device = self.model.device  # update device
