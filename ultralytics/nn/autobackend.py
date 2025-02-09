@@ -17,7 +17,6 @@ from ultralytics.utils import ARM64, IS_JETSON, IS_RASPBERRYPI, LINUX, LOGGER, P
 from ultralytics.utils.checks import check_requirements, check_suffix, check_version, check_yaml, is_rockchip
 from ultralytics.utils.downloads import attempt_download_asset, is_url
 
-npu_number = 0
 
 
 def check_class_names(names):
@@ -95,6 +94,7 @@ class AutoBackend(nn.Module):
         batch=1,
         fuse=True,
         verbose=True,
+        **kwargs,
     ):
         """
         Initialize the AutoBackend for inference.
@@ -490,6 +490,7 @@ class AutoBackend(nn.Module):
                 w = next(w.rglob("*.rknn"))  # get *.rknn file from *_rknn_model dir
             rknn_model = RKNNLite()
             rknn_model.load_rknn(w)
+            npu_number = kwargs.get('npu',0)
             rknn_model.init_runtime(core_mask=npu_number)
             metadata = Path(w).parent / "metadata.yaml"
 
