@@ -84,6 +84,7 @@ class Model(torch.nn.Module):
         model: Union[str, Path] = "yolo11n.pt",
         task: str = None,
         verbose: bool = False,
+        **kwargs,
     ) -> None:
         """
         Initializes a new instance of the YOLO model class.
@@ -111,6 +112,7 @@ class Model(torch.nn.Module):
             >>> model = Model("hub_model", verbose=True)
         """
         super().__init__()
+        self.model_kwargs = kwargs
         self.callbacks = callbacks.get_default_callbacks()
         self.predictor = None  # reuse predictor
         self.model = None  # model object
@@ -548,7 +550,7 @@ class Model(torch.nn.Module):
 
         if not self.predictor:
             self.predictor = (predictor or self._smart_load("predictor"))(overrides=args, _callbacks=self.callbacks)
-            self.predictor.setup_model(model=self.model, verbose=is_cli)
+            self.predictor.setup_model(model=self.model, verbose=is_cli, **self.model_kwargs)
         else:  # only update args if predictor is already setup
             self.predictor.args = get_cfg(self.predictor.args, args)
             if "project" in args or "name" in args:
@@ -912,7 +914,7 @@ class Model(torch.nn.Module):
             return check_class_names(self.model.names)
         if not self.predictor:  # export formats will not have predictor defined until predict() is called
             self.predictor = self._smart_load("predictor")(overrides=self.overrides, _callbacks=self.callbacks)
-            self.predictor.setup_model(model=self.model, verbose=False)
+            self.predictor.setup_model(model=self.model, verbose=False, **self.model_kwargs)
         return self.predictor.model.names
 
     @property
